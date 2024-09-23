@@ -122,7 +122,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="form-group">
             <label for="password">Password:</label>
-            <input type="password" name="password" class="form-control" required>
+            <input type="password" name="password" class="form-control" required id="password-input">
+            <input type="checkbox" id="show-password" onclick="this.form.password.type = this.checked ? 'text' : 'password'">
+            <label for="show-password">Show Password</label>
         </div>
 
         <!-- Role Selection -->

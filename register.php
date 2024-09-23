@@ -108,13 +108,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 14px;
             color: #888;
         }
+        #driver-details {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="signup-container">
-        <h2 class="signup-header">Sign Up for Care Delivery</h2>
+        <h2 class="signup-header">Sign Up for Rindra Delivery</h2>
 
         <?php if (!empty($error)): ?>
             <div class="error-message"><?= $error; ?></div>
@@ -131,43 +134,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
-                <input type="password" name="password" class="form-control" required>
+                <input type="password" name="password" class="form-control" required id="password-input">
+                <input type="checkbox" id="show-password" onclick="this.form.password.type = this.checked ? 'text' : 'password'">
+                <label for="show-password">Show Password</label>
             </div>
             <div class="form-group">
-                <label for="driver_name">Driver Name:</label>
-                <input type="text" name="driver_name" class="form-control" required>
+                <label for="roles">Select Role:</label><br>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="roles" value="client" id="roleClient" checked>
+                <label class="form-check-label" for="roleClient">Client</label>
             </div>
-            <div class="form-group">
-                <label for="license_number">License Number:</label>
-                <input type="text" name="license_number" class="form-control" required>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="roles" value="driver" id="roleDriver" onclick="document.getElementById('driver-details').style.display = this.checked ? 'block' : 'none';">
+                 <label class="form-check-label" for="roleDriver">Driver</label>
             </div>
-            <div class="form-group">
-                <label for="vehicle_info">Vehicle Info:</label>
-                <input type="text" name="vehicle_info" class="form-control" required>
             </div>
-            <div class="form-group">
-                <label for="availability">Availability:</label>
-                <select name="availability" class="form-control">
-                    <option value="available">Available</option>
-                    <option value="unavailable">Unavailable</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="roles">Select Role(s):</label><br>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="roles[]" value="client" id="roleClient" checked>
-                    <label class="form-check-label" for="roleClient">Client</label>
+            <div id="driver-details">
+                <div class="form-group">
+                    <label for="driver_name">Driver Name:</label>
+                    <input type="text" name="driver_name" class="form-control" required>
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="roles[]" value="driver" id="roleDriver">
-                    <label class="form-check-label" for="roleDriver">Driver</label>
+                <div class="form-group">
+                    <label for="license_number">License Number:</label>
+                    <input type="text" name="license_number" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="vehicle_info">Vehicle Info:</label>
+                    <input type="text" name="vehicle_info" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="availability">Availability:</label>
+                    <select name="availability" class="form-control">
+                        <option value="available">Available</option>
+                        <option value="unavailable">Unavailable</option>
+                    </select>
                 </div>
             </div>
             <button type="submit" class="btn btn-custom btn-block">Sign Up</button>
         </form>
 
         <div class="footer">
-            &copy; 2024 Care Delivery. All rights reserved.
+            &copy; 2024 Rindra Delivery. All rights reserved.
         </div>
     </div>
 </div>

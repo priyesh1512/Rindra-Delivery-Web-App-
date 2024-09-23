@@ -1,0 +1,94 @@
+/* Global Styles */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f4f8; /* Light blue background */
+}
+
+.container {
+    max-width: 600px; /* Adjust the width of the form container */
+    margin: 50px auto; /* Center the container */
+    padding: 30px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Light shadow */
+    border-radius: 10px;
+}
+
+h2 {
+    text-align: center;
+    color: #00264d; /* Dark blue for the heading */
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+/* Form Styles */
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+    color: #00264d; /* Dark blue for labels */
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #00264d; /* Dark blue border */
+    border-radius: 5px;
+    background-color: #e6f0ff; /* Light blue form elements */
+    margin-top: 5px;
+}
+
+input[type="text"]:focus, select:focus {
+    border-color: #003366; /* Darker blue on focus */
+    box-shadow: 0 0 5px rgba(0, 0, 51, 0.2);
+}
+
+/* Button Styles */
+
+button[type="submit"] {
+    background-color: #003366; /* Dark blue for the button */
+    color: #fff;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%; /* Full width button */
+}
+
+button[type="submit"]:hover {
+    background-color: #001f3f; /* Darker blue on hover */
+}
+
+/* Alert Box Styles */
+
+.alert {
+    padding: 15px;
+    background-color: #ffcccc; /* Light red for error alerts */
+    color: #a94442; /* Darker red for error text */
+    border: 1px solid #ebccd1;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Optional Placeholder Option Styles */
+
+select option:first-child {
+    color: #888;
+}
+
+/* Miscellaneous */
+
+.mb-3 {
+    margin-bottom: 20px;
+}
+
+.mt-2 {
+    margin-top: 20px;
+}

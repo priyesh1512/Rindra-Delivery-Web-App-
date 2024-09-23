@@ -108,7 +108,7 @@ $order_history = $stmt->fetchAll();
                         <tr>
                             <td><?= $order['id']; ?></td>
                             <td><?= ucfirst($order['status']); ?></td>
-                            <td><?= htmlspecialchars($order['driver_name']) ?: 'Not Assigned'; ?></td>
+                            <td><?= htmlspecialchars($order['driver_name'] ?: 'Not Assigned'); ?></td>
                             <td><?= htmlspecialchars($order['address']); ?></td>
                             <td><?= htmlspecialchars($order['contact_info']); ?></td>
                         </tr>
