@@ -2,8 +2,11 @@
 session_start();
 require 'config.php';  // Include database connection
 
-// Fetch orders
-$orders = $pdo->query("SELECT * FROM orders")->fetchAll(PDO::FETCH_ASSOC);
+// Fetch active orders (orders that are not delivered)
+$active_orders = $pdo->query("SELECT * FROM orders WHERE status != 'delivered'")->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch order history (delivered orders)
+$order_history = $pdo->query("SELECT * FROM orders WHERE status = 'delivered'")->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch users (clients)
 $users = $pdo->query("SELECT id, name FROM users WHERE role = 'client'")->fetchAll(PDO::FETCH_KEY_PAIR);
@@ -20,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate status
     if (in_array($new_status, ['pending', 'picked_up', 'delivered'])) {
         // Update the order status and driver ID based on the order ID
-        $stmt = $pdo->prepare("UPDATE orders SET status = :status, driver_id = :driver_id WHERE id = :order_id");
+        $stmt = $pdo->prepare("UPDATE orders SET status = :status, driver_id = :driver_id, updated_at = NOW() WHERE id = :order_id");
         $stmt->execute([':status' => $new_status, ':driver_id' => $driver_id, ':order_id' => $order_id]);
     }
 
@@ -41,6 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container">
     <h2>Admin Dashboard</h2>
     <a href="create_order.php" class="btn btn-primary mb-3">Create New Order</a>
+
+    <!-- Active Orders Table -->
+    <h4>Active Orders</h4>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -54,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($orders as $order): ?>
+            <?php foreach ($active_orders as $order): ?>
                 <tr>
                     <td><?= $order['id']; ?></td>
                     <td><?= $users[$order['client_id']] ?? 'Unknown'; ?></td>
@@ -79,6 +85,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <button type="submit" class="btn btn-primary mt-2">Update</button>
                         </form>
                     </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <!-- Order History Table -->
+    <h4 class="mt-5">Order History (Delivered Orders)</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Client Name</th>
+                <th>Address</th>
+                <th>Contact Info</th>
+                <th>Delivery Status</th>
+                <th>Driver</th>
+                <th>Updated At</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($order_history as $order): ?>
+                <tr>
+                    <td><?= $order['id']; ?></td>
+                    <td><?= $users[$order['client_id']] ?? 'Unknown'; ?></td>
+                    <td><?= $order['address']; ?></td>
+                    <td><?= $order['contact_info']; ?></td>
+                    <td><?= ucfirst($order['status']); ?></td>
+                    <td><?= isset($drivers[$order['driver_id']]) ? $drivers[$order['driver_id']] : 'Not Assigned'; ?></td>
+                    <td><?= $order['updated_at']; ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
