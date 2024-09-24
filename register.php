@@ -1,17 +1,15 @@
 <?php
 require 'config.php';  // Include database connection
 
+$error = '';  // Initialize error variable
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_BCRYPT);  // Hash the password
-    $driver_name = $_POST['driver_name']; // New driver name field
 
-    // Check if the role is selected
-    $roles = isset($_POST['roles']) ? $_POST['roles'] : ['client'];  // Default to client if no role is selected
-
-    // Convert roles array into a comma-separated string
-    $roleString = implode(',', $roles);
+    // Get the role
+    $role = $_POST['roles'];  // Single value ('client' or 'driver')
 
     // Check if the email already exists
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
@@ -19,23 +17,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($stmt->rowCount() > 0) {
         $error = "This email is already registered.";
     } else {
-        // Insert new user into the database with selected role(s)
+        // Insert new user into the database
         $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (:name, :email, :password, :role)");
         $stmt->execute([
             ':name' => $name, 
             ':email' => $email, 
             ':password' => $password, 
-            ':role' => $roleString  // Save the roles as a comma-separated string
+            ':role' => $role  // Save the role ('client' or 'driver')
         ]);
 
         // Get the user ID of the newly created user
         $user_id = $pdo->lastInsertId();
 
         // If the user is a driver, insert the driver information into the drivers table
-        if (in_array('driver', $roles)) {
-            $license_number = $_POST['license_number']; // Assuming you have this input
-            $vehicle_info = $_POST['vehicle_info']; // Assuming you have this input
-            $availability = $_POST['availability'] ?? 'available'; // Default to available
+        if ($role === 'driver') {
+            $driver_name = $_POST['driver_name'];
+            $license_number = $_POST['license_number'];
+            $vehicle_info = $_POST['vehicle_info'];
+            $availability = $_POST['availability'] ?? 'available';  // Default to 'available' if not provided
 
             $stmt = $pdo->prepare("INSERT INTO drivers (user_id, license_number, vehicle_info, availability, driver_name) VALUES (:user_id, :license_number, :vehicle_info, :availability, :driver_name)");
             $stmt->execute([
@@ -54,7 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!-- HTML for Sign Up form -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -112,6 +110,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: none;
         }
     </style>
+
+    <script>
+        function toggleDriverDetails() {
+            var driverDetails = document.getElementById('driver-details');
+            var isDriver = document.getElementById('roleDriver').checked;
+            driverDetails.style.display = isDriver ? 'block' : 'none';
+        }
+    </script>
 </head>
 <body>
 
@@ -140,27 +146,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
                 <label for="roles">Select Role:</label><br>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="roles" value="client" id="roleClient" checked>
-                <label class="form-check-label" for="roleClient">Client</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="roles" value="driver" id="roleDriver" onclick="document.getElementById('driver-details').style.display = this.checked ? 'block' : 'none';">
-                 <label class="form-check-label" for="roleDriver">Driver</label>
-            </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="roles" value="client" id="roleClient" checked onclick="toggleDriverDetails()">
+                    <label class="form-check-label" for="roleClient">Client</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="roles" value="driver" id="roleDriver" onclick="toggleDriverDetails()">
+                    <label class="form-check-label" for="roleDriver">Driver</label>
+                </div>
             </div>
             <div id="driver-details">
                 <div class="form-group">
                     <label for="driver_name">Driver Name:</label>
-                    <input type="text" name="driver_name" class="form-control" required>
+                    <input type="text" name="driver_name" class="form-control">
                 </div>
                 <div class="form-group">
                     <label for="license_number">License Number:</label>
-                    <input type="text" name="license_number" class="form-control" required>
+                    <input type="text" name="license_number" class="form-control">
                 </div>
                 <div class="form-group">
                     <label for="vehicle_info">Vehicle Info:</label>
-                    <input type="text" name="vehicle_info" class="form-control" required>
+                    <input type="text" name="vehicle_info" class="form-control">
                 </div>
                 <div class="form-group">
                     <label for="availability">Availability:</label>
