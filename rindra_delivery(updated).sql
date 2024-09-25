@@ -1,266 +1,126 @@
-mysql  Ver 8.0.30 for Win64 on x86_64 (MySQL Community Server - GPL)
-Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+-- --------------------------------------------------------
+-- Host:                         127.0.0.1
+-- Server version:               8.0.30 - MySQL Community Server - GPL
+-- Server OS:                    Win64
+-- HeidiSQL Version:             12.1.0.6537
+-- --------------------------------------------------------
 
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-Usage: mysql [OPTIONS] [database]
-  -?, --help          Display this help and exit.
-  -I, --help          Synonym for -?
-  --auto-rehash       Enable automatic rehashing. One doesn't need to use
-                      'rehash' to get table and field completion, but startup
-                      and reconnecting may take a longer time. Disable with
-                      --disable-auto-rehash.
-                      (Defaults to on; use --skip-auto-rehash to disable.)
-  -A, --no-auto-rehash 
-                      No automatic rehashing. One has to use 'rehash' to get
-                      table and field completion. This gives a quicker start of
-                      mysql and disables rehashing on reconnect.
-  --auto-vertical-output 
-                      Automatically switch to vertical output mode if the
-                      result is wider than the terminal width.
-  -B, --batch         Don't use history file. Disable interactive behavior.
-                      (Enables --silent.)
-  --bind-address=name IP address to bind to.
-  --binary-as-hex     Print binary data as hex. Enabled by default for
-                      interactive terminals.
-  --character-sets-dir=name 
-                      Directory for character set files.
-  --column-type-info  Display column type information.
-  -c, --comments      Preserve comments. Send comments to the server. The
-                      default is --skip-comments (discard comments), enable
-                      with --comments.
-  -C, --compress      Use compression in server/client protocol.
-  -#, --debug[=#]     This is a non-debug version. Catch this and exit.
-  --debug-check       This is a non-debug version. Catch this and exit.
-  -T, --debug-info    This is a non-debug version. Catch this and exit.
-  -D, --database=name Database to use.
-  --default-character-set=name 
-                      Set the default character set.
-  --delimiter=name    Delimiter to be used.
-  --enable-cleartext-plugin 
-                      Enable/disable the clear text authentication plugin.
-  -e, --execute=name  Execute command and quit. (Disables --force and history
-                      file.)
-  -E, --vertical      Print the output of a query (rows) vertically.
-  -f, --force         Continue even if we get an SQL error.
-  --histignore=name   A colon-separated list of patterns to keep statements
-                      from getting logged into syslog and mysql history.
-  -G, --named-commands 
-                      Enable named commands. Named commands mean this program's
-                      internal commands; see mysql> help . When enabled, the
-                      named commands can be used from any line of the query,
-                      otherwise only from the first line, before an enter.
-                      Disable with --disable-named-commands. This option is
-                      disabled by default.
-  -i, --ignore-spaces Ignore space after function names.
-  --init-command=name SQL Command to execute when connecting to MySQL server.
-                      Will automatically be re-executed when reconnecting.
-  --local-infile      Enable/disable LOAD DATA LOCAL INFILE.
-  -b, --no-beep       Turn off beep on error.
-  -h, --host=name     Connect to host.
-  --dns-srv-name=name Connect to a DNS SRV resource
-  -H, --html          Produce HTML output.
-  -X, --xml           Produce XML output.
-  --line-numbers      Write line numbers for errors.
-                      (Defaults to on; use --skip-line-numbers to disable.)
-  -L, --skip-line-numbers 
-                      Don't write line number for errors.
-  -n, --unbuffered    Flush buffer after each query.
-  --column-names      Write column names in results.
-                      (Defaults to on; use --skip-column-names to disable.)
-  -N, --skip-column-names 
-                      Don't write column names in results.
-  --sigint-ignore     Ignore SIGINT (CTRL-C).
-  -o, --one-database  Ignore statements except those that occur while the
-                      default database is the one named at the command line.
-  -p, --password[=name] 
-                      Password to use when connecting to server. If password is
-                      not given it's asked from the tty.
-  -,, --password1[=name] 
-                      Password for first factor authentication plugin.
-  -,, --password2[=name] 
-                      Password for second factor authentication plugin.
-  -,, --password3[=name] 
-                      Password for third factor authentication plugin.
-  -W, --pipe          Use named pipes to connect to server.
-  -P, --port=#        Port number to use for connection or 0 for default to, in
-                      order of preference, my.cnf, $MYSQL_TCP_PORT,
-                      /etc/services, built-in default (3306).
-  --prompt=name       Set the mysql prompt to this value.
-  --protocol=name     The protocol to use for connection (tcp, socket, pipe,
-                      memory).
-  -q, --quick         Don't cache result, print it row by row. This may slow
-                      down the server if the output is suspended. Doesn't use
-                      history file.
-  -r, --raw           Write fields without conversion. Used with --batch.
-  --reconnect         Reconnect if the connection is lost. Disable with
-                      --disable-reconnect. This option is enabled by default.
-                      (Defaults to on; use --skip-reconnect to disable.)
-  -s, --silent        Be more silent. Print results with a tab as separator,
-                      each row on new line.
-  --shared-memory-base-name=name 
-                      Base name of shared memory.
-  -S, --socket=name   The socket file to use for connection.
-  --server-public-key-path=name 
-                      File path to the server public RSA key in PEM format.
-  --get-server-public-key 
-                      Get server public key
-  --ssl-mode=name     SSL connection mode.
-  --ssl-ca=name       CA file in PEM format.
-  --ssl-capath=name   CA directory.
-  --ssl-cert=name     X509 cert in PEM format.
-  --ssl-cipher=name   SSL cipher to use.
-  --ssl-key=name      X509 key in PEM format.
-  --ssl-crl=name      Certificate revocation list.
-  --ssl-crlpath=name  Certificate revocation list path.
-  --tls-version=name  TLS version to use, permitted values are: TLSv1.2,
-                      TLSv1.3
-  --ssl-fips-mode=name 
-                      SSL FIPS mode (applies only for OpenSSL); permitted
-                      values are: OFF, ON, STRICT
-  --tls-ciphersuites=name 
-                      TLS v1.3 cipher to use.
-  --ssl-session-data=name 
-                      Session data file to use to enable ssl session reuse
-  --ssl-session-data-continue-on-failed-reuse 
-                      If set to ON, this option will allow connection to
-                      succeed even if session data cannot be reused.
-  -t, --table         Output in table format.
-  --tee=name          Append everything into outfile. See interactive help (\h)
-                      also. Does not work in batch mode. Disable with
-                      --disable-tee. This option is disabled by default.
-  -u, --user=name     User for login if not current user.
-  -U, --safe-updates  Only allow UPDATE and DELETE that uses keys.
-  -U, --i-am-a-dummy  Synonym for option --safe-updates, -U.
-  -v, --verbose       Write more. (-v -v -v gives the table output format).
-  -V, --version       Output version information and exit.
-  -w, --wait          Wait and retry if connection is down.
-  --connect-timeout=# Number of seconds before connection timeout.
-  --max-allowed-packet=# 
-                      The maximum packet length to send to or receive from
-                      server.
-  --net-buffer-length=# 
-                      The buffer size for TCP/IP and socket communication.
-  --select-limit=#    Automatic limit for SELECT when using --safe-updates.
-  --max-join-size=#   Automatic limit for rows in a join when using
-                      --safe-updates.
-  --show-warnings     Show warnings after every statement.
-  -j, --syslog        Log filtered interactive commands to syslog. Filtering of
-                      commands depends on the patterns supplied via histignore
-                      option besides the default patterns.
-  --plugin-dir=name   Directory for client-side plugins.
-  --default-auth=name Default authentication client-side plugin to use.
-  --binary-mode       By default, ASCII '\0' is disallowed and '\r\n' is
-                      translated to '\n'. This switch turns off both features,
-                      and also turns off parsing of all clientcommands except
-                      \C and DELIMITER, in non-interactive mode (for input
-                      piped to mysql or loaded using the 'source' command).
-                      This is necessary when processing output from mysqlbinlog
-                      that may contain blobs.
-  --connect-expired-password 
-                      Notify the server that this client is prepared to handle
-                      expired password sandbox mode.
-  --compression-algorithms=name 
-                      Use compression algorithm in server/client protocol.
-                      Valid values are any combination of
-                      'zstd','zlib','uncompressed'.
-  --zstd-compression-level=# 
-                      Use this compression level in the client/server protocol,
-                      in case --compression-algorithms=zstd. Valid range is
-                      between 1 and 22, inclusive. Default is 3.
-  --load-data-local-dir=name 
-                      Directory path safe for LOAD DATA LOCAL INFILE to read
-                      from.
-  --fido-register-factor=name 
-                      Specifies authentication factor, for which registration
-                      needs to be done.
-  --oci-config-file=name 
-                      Specifies the location of the OCI configuration file.
-                      Default for Linux is ~/.oci/config and %HOME/.oci/config
-                      on Windows.
 
-Default options are read from the following files in the given order:
-C:\Windows\my.ini C:\Windows\my.cnf C:\my.ini C:\my.cnf D:\laragon\bin\mysql\mysql-8.0.30-winx64\my.ini D:\laragon\bin\mysql\mysql-8.0.30-winx64\my.cnf 
-The following groups are read: mysql client
-The following options may be given as the first argument:
---print-defaults        Print the program argument list and exit.
---no-defaults           Don't read default options from any option file,
-                        except for login file.
---defaults-file=#       Only read default options from the given file #.
---defaults-extra-file=# Read this file after the global files are read.
---defaults-group-suffix=#
-                        Also read groups with concat(group, suffix)
---login-path=#          Read this path from the login file.
+-- Dumping database structure for rindra_delivery
+CREATE DATABASE IF NOT EXISTS `rindra_delivery` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `rindra_delivery`;
 
-Variables (--variable-name=value)
-and boolean options {FALSE|TRUE}          Value (after reading options)
------------------------------------------ --------------------------------
-auto-rehash                               TRUE
-auto-vertical-output                      FALSE
-bind-address                              (No default value)
-binary-as-hex                             FALSE
-character-sets-dir                        (No default value)
-column-type-info                          FALSE
-comments                                  FALSE
-compress                                  FALSE
-database                                  (No default value)
-default-character-set                     auto
-delimiter                                 ;
-enable-cleartext-plugin                   FALSE
-vertical                                  FALSE
-force                                     FALSE
-histignore                                (No default value)
-named-commands                            FALSE
-ignore-spaces                             FALSE
-init-command                              (No default value)
-local-infile                              FALSE
-no-beep                                   FALSE
-host                                      localhost
-dns-srv-name                              (No default value)
-html                                      FALSE
-xml                                       FALSE
-line-numbers                              TRUE
-unbuffered                                FALSE
-column-names                              TRUE
-sigint-ignore                             FALSE
-port                                      3306
-prompt                                    mysql> 
-quick                                     FALSE
-raw                                       FALSE
-reconnect                                 FALSE
-shared-memory-base-name                   (No default value)
-socket                                    /tmp/mysql.sock
-server-public-key-path                    (No default value)
-get-server-public-key                     FALSE
-ssl-ca                                    (No default value)
-ssl-capath                                (No default value)
-ssl-cert                                  (No default value)
-ssl-cipher                                (No default value)
-ssl-key                                   (No default value)
-ssl-crl                                   (No default value)
-ssl-crlpath                               (No default value)
-tls-version                               (No default value)
-tls-ciphersuites                          (No default value)
-ssl-session-data                          (No default value)
-ssl-session-data-continue-on-failed-reuse FALSE
-table                                     FALSE
-user                                      root
-safe-updates                              FALSE
-i-am-a-dummy                              FALSE
-connect-timeout                           0
-max-allowed-packet                        16777216
-net-buffer-length                         16384
-select-limit                              1000
-max-join-size                             1000000
-show-warnings                             FALSE
-plugin-dir                                (No default value)
-default-auth                              (No default value)
-binary-mode                               FALSE
-connect-expired-password                  FALSE
-compression-algorithms                    (No default value)
-zstd-compression-level                    3
-load-data-local-dir                       (No default value)
-fido-register-factor                      (No default value)
-oci-config-file                           (No default value)
+-- Dumping structure for table rindra_delivery.drivers
+CREATE TABLE IF NOT EXISTS `drivers` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int unsigned NOT NULL,
+  `license_number` varchar(50) NOT NULL,
+  `vehicle_info` varchar(100) NOT NULL,
+  `availability` enum('available','unavailable') DEFAULT 'available',
+  `driver_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `drivers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Dumping data for table rindra_delivery.drivers: ~1 rows (approximately)
+INSERT IGNORE INTO `drivers` (`id`, `user_id`, `license_number`, `vehicle_info`, `availability`, `driver_name`) VALUES
+	(12, 16, '6506', 'Volvo 189', 'available', 'Fam'),
+	(13, 22, '0789', 'Honda City', 'available', 'Test');
+
+-- Dumping structure for table rindra_delivery.orders
+CREATE TABLE IF NOT EXISTS `orders` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `client_id` int unsigned NOT NULL,
+  `driver_id` int unsigned DEFAULT NULL,
+  `status` enum('pending','picked_up','delivered') DEFAULT 'pending',
+  `address` varchar(255) NOT NULL,
+  `contact_info` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `driver_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`),
+  KEY `orders_ibfk_2` (`driver_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Dumping data for table rindra_delivery.orders: ~6 rows (approximately)
+INSERT IGNORE INTO `orders` (`id`, `client_id`, `driver_id`, `status`, `address`, `contact_info`, `created_at`, `updated_at`, `driver_name`) VALUES
+	(3, 8, 12, 'delivered', 'AIU', '789987657', '2024-09-19 20:41:26', '2024-09-23 03:27:07', NULL),
+	(6, 8, 12, 'delivered', 'Solomon Hall', '987654456', '2024-09-20 13:31:30', '2024-09-23 03:27:04', NULL),
+	(7, 8, 12, 'delivered', 'Solomon Hall', '7689086', '2024-09-20 16:51:11', '2024-09-23 03:27:01', NULL),
+	(8, 8, 12, 'delivered', 'Solomon Hall', '987654456', '2024-09-22 17:03:55', '2024-09-24 16:50:16', NULL),
+	(9, 8, 13, 'pending', '123', '123', '2024-09-24 16:50:35', '2024-09-25 20:52:31', NULL),
+	(10, 19, 12, 'delivered', 'AIU', '12345', '2024-09-25 20:32:20', '2024-09-25 20:33:38', NULL);
+
+-- Dumping structure for table rindra_delivery.order_history
+CREATE TABLE IF NOT EXISTS `order_history` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` int unsigned NOT NULL,
+  `status` enum('pending','picked_up','delivered') NOT NULL,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `order_id` (`order_id`),
+  CONSTRAINT `order_history_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Dumping data for table rindra_delivery.order_history: ~0 rows (approximately)
+
+-- Dumping structure for table rindra_delivery.users
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('admin','driver','client') NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Dumping data for table rindra_delivery.users: ~9 rows (approximately)
+INSERT IGNORE INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VALUES
+	(8, 'Priyesh', 'priyesh@123', '$2y$10$PMyyNv2qEBHBrxDCLphzBupqV/0k2vSyzSQ559DxP43ykio8LcYhO', 'client', '2024-09-19 07:44:48'),
+	(10, 'admin', 'admin@123', '$2y$10$OKM8KV0tIYk8gQWYEAYFrOrap8lgPaz9Ne1F5vYsimg3wQ9XNRhdS', 'admin', '2024-09-19 19:14:28'),
+	(16, 'Fam', 'fam@driver', '$2y$10$pm24ThpzuHJl65WGi9ZPyOd1ErvEUEknk9rmT/sQ4aGYUQC9SOH1K', 'driver', '2024-09-19 21:04:41'),
+	(17, 'Priyesh kumar', 'Priyesh@1', '$2y$10$1FbZ3pL3HoUG48YBh0kMVOBavhavEDrigytm9YUUEU7KAdoy1GLam', 'client', '2024-09-24 16:54:51'),
+	(18, 'phillip', 'phillip23@gmail.com', '$2y$10$msfc957DAnnvSv1e/gET9eWDWn8bIPMk8BPETn76QUlqYbHHL.tdq', 'client', '2024-09-24 16:56:58'),
+	(19, 'Enowell', 'test@enowell', '$2y$10$SxOj6Zs2ueJ05SPfKW89M.KC6rphwtLRCdEOhsARr2u33BevhTdGK', 'client', '2024-09-25 20:31:48'),
+	(20, 'Fan', 'fan@123', '$2y$10$P1YF4qipyCYlmkXgP8H/2umNKdXHDglDyRFN9MHbNncrD66Lo5.n6', 'driver', '2024-09-25 20:41:31'),
+	(21, 'Fan', 'fan@test', '$2y$10$XvhPbRIQrlCqI2EzqaSNmuN609JtyAbO/HD0.KdkqHP4OGYCO9X66', 'driver', '2024-09-25 20:44:19'),
+	(22, 'test', 'test@1', '$2y$10$8gS8rlC8mCzXYf3e1bh1ze/6W15sE9rs2Cpp3fYl0VWr.nE2N1Xmi', 'driver', '2024-09-25 20:52:12');
+
+-- Dumping structure for table rindra_delivery.vehicles
+CREATE TABLE IF NOT EXISTS `vehicles` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `type` enum('car','motorcycle') NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `description` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Dumping data for table rindra_delivery.vehicles: ~4 rows (approximately)
+INSERT IGNORE INTO `vehicles` (`id`, `type`, `name`, `price`, `image_url`, `description`) VALUES
+	(1, 'car', 'Toyota Camry', 24000.00, 'https://example.com/images/toyota_camry.jpg', 'A reliable and fuel-efficient sedan.'),
+	(2, 'car', 'Honda Accord', 26000.00, 'https://example.com/images/honda_accord.jpg', 'A spacious and comfortable sedan with advanced features.'),
+	(3, 'motorcycle', 'Yamaha YZF-R3', 5000.00, 'https://example.com/images/yamaha_r3.jpg', 'A lightweight sport bike with excellent handling.'),
+	(4, 'motorcycle', 'Harley Davidson Sportster', 12000.00, 'https://example.com/images/harley_sportster.jpg', 'A classic cruiser motorcycle with a powerful engine.');
+
+/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
+/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
+/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
