@@ -1,0 +1,39 @@
+---Login Credientials---
+-- Admin --
+1. Name: Admin
+   Email: admin@123
+   Password: 123
+
+-- Driver --
+1. Name: Fam
+   Email: fam@driver
+   Password: 123
+
+2. Name: Fan
+   Email: fan@123
+   Password: 123
+
+3. Name: Fan
+   Email: fan@test
+   Password: 123
+
+4. Name: Test
+   Email: test@1
+   Password: 123
+
+-- Client --
+1. Name: Priyesh
+   Email: priyesh@123
+   Password: 123
+
+2. Name: Priyesh Kumar
+   Email: Priyesh@1
+   Password: 123
+
+3. Name: Phillip
+   Email: phillip23@gmail.com
+   Password: 123
+
+4. Name: Enowell
+   Email: test@enowell
+   Password: 123
