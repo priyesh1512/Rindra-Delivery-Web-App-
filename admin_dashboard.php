@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container">
     <h2>Admin Dashboard</h2>
     <a href="create_order.php" class="btn btn-primary mb-3">Create New Order</a>
-
+    <a href="logout.php" class="btn btn-custom float-right">Logout</a>    
     <!-- Active Orders Table -->
     <h4>Active Orders</h4>
     <table class="table table-bordered">

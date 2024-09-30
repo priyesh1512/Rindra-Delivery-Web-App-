@@ -89,6 +89,7 @@ $order_history = $stmt->fetchAll();
 <div class="container mt-5">
     <div class="dashboard-container">
         <h2 class="dashboard-header">Welcome to Your Dashboard, <?= htmlspecialchars($client_name); ?>!</h2>
+        <a href="logout.php" class="btn btn-custom float-right">Logout</a>
         <h4 class="text-center mb-4">Active Orders</h4>
 
         <!-- Active Orders Table -->
