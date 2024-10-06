@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         // Redirect back to admin dashboard after successful creation
-        header('Location: admin_dashboard.php');
+        header('Location: admin_dashboard2.php');
         exit;
     } else {
         $error = "All fields are required.";
