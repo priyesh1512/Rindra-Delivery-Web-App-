@@ -182,3 +182,30 @@ button[type="submit"]:hover {
 .admin-dashboard .btn:hover {
     background-color: #001f3f; /* Darker blue on hover */
 }
+.pagination-horizontal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination-horizontal .page-item {
+    margin: 0 10px;
+}
+
+.pagination-horizontal .page-link {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    color: #333;
+    text-decoration: none;
+}
+
+.pagination-horizontal .page-link:hover {
+    background-color: #ccc;
+}
+
+.pagination-horizontal .page-item.active .page-link {
+    background-color: #337ab7;
+    color: #fff;
+}
