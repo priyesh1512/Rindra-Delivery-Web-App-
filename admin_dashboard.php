@@ -131,7 +131,7 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
         <h5>Total Delivered Orders: <?= $total_delivered_orders; ?></h5>
     </section>
     <!-- Search and Filter Form -->
-    <form method="GET" action="admin_dashboard2.php" class="form-inline mb-3">
+    <form method="GET" action="admin_dashboard.php" class="form-inline mb-3">
         <input type="text" name="client_name" class="form-control mr-2" placeholder="Search by Client Name" value="<?= htmlspecialchars($client_name); ?>">
         <select name="filter_status" class="form-control mr-2">
             <option value="">All Statuses</option>
