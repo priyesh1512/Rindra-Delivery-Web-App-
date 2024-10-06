@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_update->execute();
     }
 
-    header("Location: admin_dashboard2.php");
+    header("Location: admin_dashboard.php");
     exit;
 }
 
