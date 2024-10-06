@@ -14,6 +14,7 @@ $start_history = ($page_history - 1) * $perPage;
 $search = $_GET['search'] ?? '';
 $filter_status = $_GET['filter_status'] ?? '';
 $client_name = $_GET['client_name'] ?? '';
+$order_id = $_GET['order_id'] ?? '';
 
 // Base query for active orders
 $query_active = "SELECT o.* FROM orders o INNER JOIN users u ON o.client_id = u.id WHERE o.status != 'delivered'";
@@ -23,6 +24,12 @@ $params_active = [];
 if (!empty($client_name)) {
     $query_active .= " AND u.name = :client_name";
     $params_active[':client_name'] = $client_name;
+}
+
+// Modify query based on order ID search
+if (!empty($order_id)) {
+    $query_active .= " AND o.id = :order_id";
+    $params_active[':order_id'] = $order_id;
 }
 
 // Modify query based on status filter
@@ -38,6 +45,11 @@ $params_count = [];
 if (!empty($client_name)) {
     $query_count .= " AND u.name = :client_name";
     $params_count[':client_name'] = $client_name;
+}
+
+if (!empty($order_id)) {
+    $query_count .= " AND o.id = :order_id";
+    $params_count[':order_id'] = $order_id;
 }
 
 if (!empty($filter_status)) {
@@ -133,6 +145,7 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
     <!-- Search and Filter Form -->
     <form method="GET" action="admin_dashboard.php" class="form-inline mb-3">
         <input type="text" name="client_name" class="form-control mr-2" placeholder="Search by Client Name" value="<?= htmlspecialchars($client_name); ?>">
+        <input type="text" name="order_id" class="form-control mr-2" placeholder="Search by Order ID" value="<?= htmlspecialchars($order_id); ?>">
         <select name="filter_status" class="form-control mr-2">
             <option value="">All Statuses</option>
             <option value="pending" <?= $filter_status === 'pending' ? 'selected' : ''; ?>>Pending</option>
@@ -189,8 +202,8 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
 <nav>
     <ul class="pagination pagination-horizontal">
         <?php for ($i = 1; $i <= $totalPagesActive; $i++): ?>
-            <li class="page-item <?= $i == $page_active ? 'active' : ''; ?>">
-                <a class="page-link" href="?page_active=<?= $i; ?>&client_name=<?= $client_name; ?>&filter_status=<?= $filter_status; ?>"><?= $i; ?></a>
+            <li class="page -item <?= $i == $page_active ? 'active' : ''; ?>">
+                <a class="page-link" href="?page_active=<?= $i; ?>&client_name=<?= $client_name; ?>&filter_status=<?= $filter_status; ?>&order_id=<?= $order_id; ?>"><?= $i; ?></a>
             </li>
         <?php endfor; ?>
     </ul>
@@ -202,7 +215,7 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
             <tr>
                 <th>Order ID</th>
                 <th>Client Name</th>
- <th>Address</th>
+                <th>Address</th>
                 <th>Contact Info</th>
                 <th>Delivery Status</th>
                 <th>Driver</th>
@@ -228,7 +241,7 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
     <ul class="pagination pagination-horizontal">
         <?php for ($i = 1; $i <= $totalPagesHistory; $i++): ?>
             <li class="page-item <?= $i == $page_history ? 'active' : ''; ?>">
-                <a class="page-link" href="?page_history=<?= $i; ?>&client_name=<?= $client_name; ?>"><?= $i; ?></a>
+                <a class="page-link" href="?page_history=<?= $i; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>"><?= $i; ?></a>
             </li>
         <?php endfor; ?>
     </ul>
