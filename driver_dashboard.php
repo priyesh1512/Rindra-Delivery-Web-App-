@@ -2,6 +2,24 @@
 session_start();
 require 'config.php';  // Include database connection
 
+// Generate a unique token for each user session
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Function to validate the CSRF token
+function validate_csrf_token($token) {
+    return $token === $_SESSION['csrf_token'];
+}
+
+// Function to sanitize inputs
+function sanitize_input($input) {
+    $input = trim($input);
+    $input = htmlspecialchars($input);
+    $input = filter_var($input, FILTER_SANITIZE_STRING);
+    return $input;
+}
+
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'driver') {
     header('Location: login.php');
     exit;
@@ -42,8 +60,18 @@ $num_pages_active_orders = ceil($total_active_orders / $orders_per_page);
 
 // Handle order status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
+    $csrf_token = $_POST['csrf_token'];
     $order_id = $_POST['order_id'];
     $new_status = $_POST['status'];
+
+    // Validate CSRF token
+    if (!validate_csrf_token($csrf_token)) {
+        die('Invalid CSRF token');
+    }
+
+    // Sanitize inputs
+    $order_id = sanitize_input($order_id);
+    $new_status = sanitize_input($new_status);
 
     // Update the order status
     $stmt = $pdo->prepare("UPDATE orders SET status = :status WHERE id = :order_id");
@@ -129,6 +157,7 @@ $num_pages_delivered_orders = ceil($total_delivered_orders / $orders_per_page);
                     <td><?= $order['contact_info']; ?></td>
                     <td>
                         <form method="POST" action="">
+                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
                             <input type="hidden" name="order_id" value="<?= $order['id']; ?>">
                             <select name="status" class="form-control" required>
                                 <option value="pending" <?= $order['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
@@ -202,30 +231,29 @@ $num_pages_delivered_orders = ceil($total_delivered_orders / $orders_per_page);
     <?php if ($num_pages_delivered_orders > 1): ?>
         <nav aria-label="Order History Pagination">
             <ul class="pagination">
-            <?php if ($page > 1): ?>
-                            <li class="page-item">
-                                <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $page - 1; ?>">Previous</a>
-                            </li>
-                        <?php endif; ?>
+                <?php if ($page > 1): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $page - 1; ?>">Previous</a>
+                    </li>
+                <?php endif; ?>
 
-                        <?php for ($i = 1; $i <= $num_pages_delivered_orders; $i++): ?>
-                            <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
-                                <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                            </li>
-                        <?php endfor; ?>
+                <?php for ($i = 1; $i <= $num_pages_delivered_orders; $i++): ?>
+                    <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
+                        <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                    </li>
+                <?php endfor; ?>
 
-                        <?php if ($page < $num_pages_delivered_orders): ?>
-                            <li class="page-item">
-                                <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $page + 1; ?>">Next</a>
-                            </li>
-                        <?php endif; ?>
-                    </ul>
-                </nav>
-            <?php endif; ?>
-
-        <?php else: ?>
-            <p class="text-center">No order history available.</p>
-        <?php endif; ?>
+                <?php if ($page < $num_pages_delivered_orders): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $page + 1; ?>">Next</a>
+                    </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+    <?php endif; ?>
+<?php else: ?>
+    <p class="text-center">No order history available.</p>
+<?php endif; ?>
     </div>
 </div>
 
