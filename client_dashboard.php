@@ -2,6 +2,24 @@
 session_start();
 require 'config.php';  // Include database connection
 
+// Generate a unique token for each user session
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Function to validate the CSRF token
+function validate_csrf_token($token) {
+    return $token === $_SESSION['csrf_token'];
+}
+
+// Function to sanitize inputs
+function sanitize_input($input) {
+    $input = trim($input);
+    $input = htmlspecialchars($input);
+    $input = filter_var($input, FILTER_SANITIZE_STRING);
+    return $input;
+}
+
 // Ensure the user is logged in and is a client
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'client') {
     header('Location: login.php');  // Redirect to login if not logged in or not a client
