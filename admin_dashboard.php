@@ -2,6 +2,24 @@
 session_start();
 require 'config.php';  // Include database connection
 
+// Generate a unique token for each user session
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Function to validate the CSRF token
+function validate_csrf_token($token) {
+    return $token === $_SESSION['csrf_token'];
+}
+
+// Function to sanitize inputs
+function sanitize_input($input) {
+    $input = trim($input);
+    $input = htmlspecialchars($input);
+    $input = filter_var($input, FILTER_SANITIZE_STRING);
+    return $input;
+}
+
 // Variables for pagination
 $perPage = 10;
 $page_active = $_GET['page_active'] ?? 1;
@@ -102,9 +120,20 @@ $total_delivered_orders = $stmt_delivered_count->fetchColumn();
 
 // Handle order status and driver assignment update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrf_token = $_POST['csrf_token'];
     $order_id = $_POST['order_id'];
     $new_status = $_POST['status'];
     $driver_id = $_POST['driver_id'];
+
+    // Validate CSRF token
+    if (!validate_csrf_token($csrf_token)) {
+        die('Invalid CSRF token');
+    }
+
+    // Sanitize inputs
+    $order_id = sanitize_input($order_id);
+    $new_status = sanitize_input($new_status);
+    $driver_id = sanitize_input($driver_id);
 
     // Validate status
     if (in_array($new_status, ['pending', 'picked_up', 'delivered'])) {
@@ -116,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_update->execute();
     }
 
-    header ("Location: admin_dashboard.php");
+    header("Location: admin_dashboard.php");
     exit;
 }
 
@@ -171,7 +200,7 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
         <tbody>
             <?php foreach ($active_orders as $order): ?>
                 <tr>
-                    <td><?= $order['id']; ?></td>
+                <td><?= $order['id']; ?></td>
                     <td><?= $users[$order['client_id']] ?? 'Unknown'; ?></td>
                     <td><?= $order['address']; ?></td>
                     <td><?= $order['contact_info']; ?></td>
@@ -179,6 +208,7 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
                     <td><?= isset($drivers[$order['driver_id']]) ? $drivers[$order['driver_id']] : 'Not Assigned'; ?></td>
                     <td>
                         <form method="POST" action="" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
                             <input type="hidden" name="order_id" value="<?= $order['id']; ?>">
                             <select name="status" class="form-control" required>
                                 <option value="pending" <?= $order['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
@@ -253,23 +283,23 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
         <ul class="pagination pagination-horizontal">
             <?php if ($page_history > 1): ?>
                 <li class="page-item">
-                    <a class="page-link" href="?page_history=<?= $page_history - 1; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>">Previous</a>
-                </li>
-            <?php endif; ?>
-            
-            <?php for ($i = 1; $i <= $totalPagesHistory; $i++): ?>
-                <li class="page-item <?= $i == $page_history ? 'active' : ''; ?>">
-                    <a class="page-link" href="?page_history=<?= $i; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>"><?= $i; ?></a>
-                </li>
-            <?php endfor; ?>
-            
-            <?php if ($page_history < $totalPagesHistory): ?>
-                <li class="page-item">
-                    <a class="page-link" href="?page_history=<?= $page_history + 1; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>">Next</a>
-                </li>
-            <?php endif; ?>
-        </ul>
+                        <a class="page-link" href="?page_history=<?= $page_history - 1; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>">Previous</a>
+                    </li>
+                <?php endif; ?>
+                
+                <?php for ($i = 1; $i <= $totalPagesHistory; $i++): ?>
+                    <li class="page-item <?= $i == $page_history ? 'active' : ''; ?>">
+                        <a class="page-link" href="?page_history=<?= $i; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>"><?= $i; ?></a>
+                    </li>
+                <?php endfor; ?>
+                
+                <?php if ($page_history < $totalPagesHistory): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?page_history=<?= $page_history + 1; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>">Next</a>
+                    </li>
+                <?php endif; ?>
+            </ul>
         </nav>
-</div>
+    </div>
 </body>
 </html>
