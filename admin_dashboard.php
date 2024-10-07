@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_update->execute();
     }
 
-    header("Location: admin_dashboard.php");
+    header ("Location: admin_dashboard.php");
     exit;
 }
 
@@ -199,15 +199,27 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
         </tbody>
     </table>
     <!-- Pagination for Active Orders -->
-<nav>
-    <ul class="pagination pagination-horizontal">
-        <?php for ($i = 1; $i <= $totalPagesActive; $i++): ?>
-            <li class="page -item <?= $i == $page_active ? 'active' : ''; ?>">
-                <a class="page-link" href="?page_active=<?= $i; ?>&client_name=<?= $client_name; ?>&filter_status=<?= $filter_status; ?>&order_id=<?= $order_id; ?>"><?= $i; ?></a>
-            </li>
-        <?php endfor; ?>
-    </ul>
-</nav>
+    <nav>
+        <ul class="pagination pagination-horizontal">
+            <?php if ($page_active > 1): ?>
+                <li class="page-item">
+                    <a class="page-link" href="?page_active=<?= $page_active - 1; ?>&client_name=<?= $client_name; ?>&filter_status=<?= $filter_status; ?>&order_id=<?= $order_id; ?>">Previous</a>
+                </li>
+            <?php endif; ?>
+            
+            <?php for ($i = 1; $i <= $totalPagesActive; $i++): ?>
+                <li class="page-item <?= $i == $page_active ? 'active' : ''; ?>">
+                    <a class="page-link" href="?page_active=<?= $i; ?>&client_name=<?= $client_name; ?>&filter_status=<?= $filter_status; ?>&order_id=<?= $order_id; ?>"><?= $i; ?></a>
+                </li>
+            <?php endfor; ?>
+            
+            <?php if ($page_active < $totalPagesActive): ?>
+                <li class="page-item">
+                    <a class="page-link" href="?page_active=<?= $page_active + 1; ?>&client_name=<?= $client_name; ?>&filter_status=<?= $filter_status; ?>&order_id=<?= $order_id; ?>">Next</a>
+                </li>
+            <?php endif; ?>
+        </ul>
+    </nav>
     <!-- Order History Table -->
     <h4 class="mt-5">Order History (Delivered Orders)</h4>
     <table class="table table-bordered">
@@ -237,15 +249,27 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
         </tbody>
     </table>
     <!-- Pagination for Order History -->
-<nav>
-    <ul class="pagination pagination-horizontal">
-        <?php for ($i = 1; $i <= $totalPagesHistory; $i++): ?>
-            <li class="page-item <?= $i == $page_history ? 'active' : ''; ?>">
-                <a class="page-link" href="?page_history=<?= $i; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>"><?= $i; ?></a>
-            </li>
-        <?php endfor; ?>
-    </ul>
-</nav>
+    <nav>
+        <ul class="pagination pagination-horizontal">
+            <?php if ($page_history > 1): ?>
+                <li class="page-item">
+                    <a class="page-link" href="?page_history=<?= $page_history - 1; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>">Previous</a>
+                </li>
+            <?php endif; ?>
+            
+            <?php for ($i = 1; $i <= $totalPagesHistory; $i++): ?>
+                <li class="page-item <?= $i == $page_history ? 'active' : ''; ?>">
+                    <a class="page-link" href="?page_history=<?= $i; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>"><?= $i; ?></a>
+                </li>
+            <?php endfor; ?>
+            
+            <?php if ($page_history < $totalPagesHistory): ?>
+                <li class="page-item">
+                    <a class="page-link" href="?page_history=<?= $page_history + 1; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>">Next</a>
+                </li>
+            <?php endif; ?>
+        </ul>
+        </nav>
 </div>
 </body>
 </html>

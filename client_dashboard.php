@@ -15,15 +15,40 @@ $stmt = $pdo->prepare("SELECT name FROM users WHERE id = :user_id");
 $stmt->execute([':user_id' => $user_id]);
 $client_name = $stmt->fetchColumn();
 
+// Set the number of orders per page
+$orders_per_page = 5;
+
+// Get the current page number
+$page = isset($_GET['page']) ? $_GET['page'] : 1;
+
+// Calculate the offset for the database query
+$offset = ($page - 1) * $orders_per_page;
+
 // Fetch active orders for the logged-in client
-$stmt = $pdo->prepare("SELECT o.*, d.driver_name FROM orders o LEFT JOIN drivers d ON o.driver_id = d.id WHERE o.client_id = :client_id AND o.status != 'delivered'");
-$stmt->execute([':client_id' => $user_id]);
+$stmt = $pdo->prepare("SELECT o.*, d.driver_name FROM orders o LEFT JOIN drivers d ON o.driver_id = d.id WHERE o.client_id = :client_id AND o.status != 'delivered' ORDER BY o.id DESC LIMIT :limit OFFSET :offset");
+$stmt->execute([':client_id' => $user_id, ':limit' => $orders_per_page, ':offset' => $offset]);
 $active_orders = $stmt->fetchAll();
 
-// Fetch order history (delivered orders)
-$stmt = $pdo->prepare("SELECT o.*, d.driver_name FROM orders o LEFT JOIN drivers d ON o.driver_id = d.id WHERE o.client_id = :client_id AND o.status = 'delivered'");
+// Fetch the total number of active orders
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM orders WHERE client_id = :client_id AND status != 'delivered'");
 $stmt->execute([':client_id' => $user_id]);
+$total_active_orders = $stmt->fetchColumn();
+
+// Calculate the number of pages for active orders
+$num_pages_active_orders = ceil($total_active_orders / $orders_per_page);
+
+// Fetch order history (delivered orders)
+$stmt = $pdo->prepare("SELECT o.*, d.driver_name FROM orders o LEFT JOIN drivers d ON o.driver_id = d.id WHERE o.client_id = :client_id AND o.status = 'delivered' ORDER BY o.id DESC LIMIT :limit OFFSET :offset");
+$stmt->execute([':client_id' => $user_id, ':limit' => $orders_per_page, ':offset' => $offset]);
 $order_history = $stmt->fetchAll();
+
+// Fetch the total number of delivered orders
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM orders WHERE client_id = :client_id AND status = 'delivered'");
+$stmt->execute([':client_id' => $user_id]);
+$total_delivered_orders = $stmt->fetchColumn();
+
+// Calculate the number of pages for delivered orders
+$num_pages_delivered_orders = ceil($total_delivered_orders / $orders_per_page);
 ?>
 
 <!-- HTML for Client Dashboard -->
@@ -90,6 +115,7 @@ $order_history = $stmt->fetchAll();
     <div class="dashboard-container">
         <h2 class="dashboard-header">Welcome to Your Dashboard, <?= htmlspecialchars($client_name); ?>!</h2>
         <a href="logout.php" class="btn btn-custom float-right">Logout</a>
+
         <h4 class="text-center mb-4">Active Orders</h4>
 
         <!-- Active Orders Table -->
@@ -116,6 +142,32 @@ $order_history = $stmt->fetchAll();
                     <?php endforeach; ?>
                 </tbody>
             </table>
+
+            <!-- Pagination for Active Orders -->
+            <?php if ($num_pages_active_orders > 1): ?>
+                <nav aria-label="Active Orders Pagination">
+                    <ul class="pagination">
+                        <?php if ($page > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $page - 1; ?>">Previous</a>
+                            </li>
+                        <?php endif; ?>
+
+                        <?php for ($i = 1; $i <= $num_pages_active_orders; $i++): ?>
+                            <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
+                                <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                            </li>
+                        <?php endfor; ?>
+
+                        <?php if ($page < $num_pages_active_orders): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $page + 1; ?>">Next</a>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
+            <?php endif; ?>
+
         <?php else: ?>
             <p class="text-center">You have no active orders.</p>
         <?php endif; ?>
@@ -148,6 +200,32 @@ $order_history = $stmt->fetchAll();
                     <?php endforeach; ?>
                 </tbody>
             </table>
+
+            <!-- Pagination for Order History -->
+            <?php if ($num_pages_delivered_orders > 1): ?>
+                <nav aria-label="Order History Pagination">
+                    <ul class="pagination">
+                        <?php if ($page > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $page - 1; ?>">Previous</a>
+                            </li>
+                        <?php endif; ?>
+
+                        <?php for ($i = 1; $i <= $num_pages_delivered_orders; $i++): ?>
+                            <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
+                                <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                            </li>
+                        <?php endfor; ?>
+
+                        <?php if ($page < $num_pages_delivered_orders): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $page + 1; ?>">Next</a>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
+            <?php endif; ?>
+
         <?php else: ?>
             <p class="text-center">You have no past orders.</p>
         <?php endif; ?>
@@ -157,6 +235,5 @@ $order_history = $stmt->fetchAll();
         </div>
     </div>
 </div>
-
 </body>
 </html>
