@@ -73,9 +73,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $order_id = sanitize_input($order_id);
     $new_status = sanitize_input($new_status);
 
-    // Update the order status
-    $stmt = $pdo->prepare("UPDATE orders SET status = :status WHERE id = :order_id");
-    $stmt->execute([':status' => $new_status, ':order_id' => $order_id]);
+    // Fetch the current order status
+    $stmt = $pdo->prepare("SELECT status FROM orders WHERE id = :order_id");
+    $stmt->execute([':order_id' => $order_id]);
+    $current_status = $stmt->fetchColumn();
+
+    // Check if the order status can be updated
+    if ($current_status === 'pending' && $new_status === 'picked_up') {
+        // Update the order status
+        $stmt = $pdo->prepare("UPDATE orders SET status = :status WHERE id = :order_id");
+        $stmt->execute([':status' => $new_status, ':order_id' => $order_id]);
+    } elseif ($current_status === 'picked_up' && $new_status === 'delivered') {
+        // Update the order status
+        $stmt = $pdo->prepare("UPDATE orders SET status = :status WHERE id = :order_id");
+        $stmt->execute([':status' => $new_status, ':order_id' => $order_id]);
+    } else {
+        // Display an error message
+        echo 'Invalid status update. Order status cannot be changed from ' . $current_status . ' to ' . $new_status . '.';
+    }
 
     header("Location: driver_dashboard.php");
     exit;
@@ -142,11 +157,15 @@ $num_pages_delivered_orders = ceil($total_delivered_orders / $orders_per_page);
                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
                             <input type="hidden" name="order_id" value="<?= $order['id']; ?>">
                             <select name="status" class="form-control" required>
-                                <option value="pending" <?= $order['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                <option value="picked_up" <?= $order['status'] === 'picked_up' ? 'selected' : ''; ?>>Picked Up</option>
-                                <option value="delivered" <?= $order['status'] === 'delivered' ? 'selected' : ''; ?>>Delivered</option>
-                            </select>
-                            <button type="submit" name="update_status" class="btn btn-primary mt-2">Update</button>
+                                <?php if ($order['status'] === 'pending'): ?>
+                                <option value="pending" selected>Pending</option>
+                                <option value="picked_up">Picked Up</option>
+                            <?php elseif ($order['status'] === 'picked_up'): ?>
+                                <option value="picked_up" selected>Picked Up</option>
+                                <option value="delivered">Delivered</option>
+                            <?php endif; ?>
+                        </select>
+                        <button type="submit" name="update_status" class="btn btn-primary mt-2">Update</button>
                         </form>
                     </td>
                 </tr>
