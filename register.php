@@ -63,52 +63,249 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Custom styles -->
     <style>
-        body {
-            background-color: #F4F4F9;
-            font-family: 'Arial', sans-serif;
-        }
-        .signup-container {
-            padding: 40px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .signup-header {
-            font-size: 28px;
-            color: #BE6DB7;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .btn-custom {
-            background-color: #BE6DB7;
-            color: white;
-            border: none;
-        }
-        .btn-custom:hover {
-            background-color: #C04A82;
-        }
-        .form-control {
-            border: 2px solid #BE6DB7;
-            border-radius: 5px;
-        }
-        .form-control:focus {
-            border-color: #DC8449;
-            box-shadow: none;
-        }
-        .error-message {
-            color: red;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #888;
-        }
-        #driver-details {
-            display: none;
-        }
+       /* Global Styles */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f4f8; /* Light blue background */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Darker shadow for contrast */
+    border-radius: 10px;
+}
+
+h2 {
+    margin-top: 0;
+    color: #00264d; /* Dark blue for headings */
+    font-weight: bold;
+}
+
+/* Header Styles */
+
+.header {
+    background-color: #00264d; /* Dark blue header */
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 3px solid #001f3f; /* Slightly darker border */
+}
+
+.header h2 {
+    margin: 0;
+}
+
+/* Table Styles */
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 20px;
+    background-color: #f9f9f9; /* Light gray table background */
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #00264d; /* Dark blue for table headers */
+    color: #fff; /* White text for contrast */
+    font-weight: bold;
+}
+
+/* Form Styles */
+
+form {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+select {
+    width: 150px;
+    height: 30px;
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid #00264d; /* Dark blue border */
+    border-radius: 5px;
+    background-color: #e6f0ff; /* Light blue form elements */
+}
+
+button[type="submit"] {
+    background-color: #003366; /* Darker blue for buttons */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #001f3f; /* Even darker on hover */
+}
+
+/* Button Styles */
+
+.btn-custom {
+    background-color: #003366; /* Darker blue */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-custom:hover {
+    background-color: #001f3f;
+}
+
+/* Miscellaneous Styles */
+
+.mb-3 {
+    margin-bottom: 20px;
+}
+
+.mt-2 {
+    margin-top: 20px;
+}
+
+/* Delivery Status Styles */
+
+.status {
+    font-size: 14px;
+    font-weight: bold;
+    color: #00264d; /* Dark blue for general status */
+}
+
+.status.pending {
+    color: #ff9900; /* Orange for pending */
+}
+
+.status.picked_up {
+    color: #33cc33; /* Green for picked up */
+}
+
+.status.delivered {
+    color: #0066cc; /* Blue for delivered */
+}
+
+/* Driver Styles */
+
+.driver {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Admin Dashboard Styles */
+
+.admin-dashboard {
+    max-width: 900px; /* Limit the width of the dashboard */
+    margin: 50px auto; /* Center the dashboard */
+    padding: 30px;
+    background-color: #f2f6fc; /* Light soft blue background */
+    border: 1px solid #ccc;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border-radius: 10px;
+}
+
+/* Header for Admin Dashboard */
+
+.admin-dashboard h2 {
+    text-align: center;
+    color: #00264d; /* Dark blue heading to match the theme */
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+/* Miscellaneous Styling for Content inside the Admin Dashboard */
+
+.admin-dashboard .content {
+    color: #333;
+    font-size: 16px;
+    text-align: center;
+}
+
+.admin-dashboard .btn {
+    display: inline-block;
+    background-color: #003366; /* Dark blue button */
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.admin-dashboard .btn:hover {
+ background-color: #001f3f; /* Darker blue on hover */
+}
+
+.signup-container {
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.signup-header {
+    font-size: 28px;
+    color: #00264d; /* Dark blue for headings */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    color: red;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #888;
+}
+
+#driver-details {
+    display: none;
+}
+
+.pagination-horizontal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination-horizontal .page-item {
+    margin: 0 10px;
+}
+
+.pagination-horizontal .page-link {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    color: #333;
+    text-decoration: none;
+}
+
+.pagination-horizontal .page-link:hover {
+    background-color: #ccc;
+}
+
+.pagination-horizontal .page-item.active .page-link {
+    background-color: #337ab7;
+    color: #fff;
+}
     </style>
 
     <script>
