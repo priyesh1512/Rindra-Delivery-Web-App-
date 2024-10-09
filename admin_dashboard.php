@@ -166,7 +166,7 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
 <div class="container">
     <h2>Admin Dashboard</h2>
     <a href="create_order.php" class="btn btn-primary mb-3">Create New Order</a>
-    <a href="logout.php" class="btn btn-custom float-right">Logout</a>
+    <a href="logout.php" class="btn btn-primary mb-3">Logout</a>
     <section class="order-stats mb-4">
         <h5>Total Active Orders: <?= $total_active_orders; ?></h5>
         <h5>Total Delivered Orders: <?= $total_delivered_orders; ?></h5>

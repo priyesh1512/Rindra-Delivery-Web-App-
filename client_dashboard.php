@@ -75,64 +75,15 @@ $num_pages_delivered_orders = ceil($total_delivered_orders / $orders_per_page);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
     <title>Client Portal</title>
-
-    <!-- Custom styles -->
-    <style>
-        body {
-            background-color: #F4F4F9;
-            font-family: 'Arial', sans-serif;
-        }
-        .dashboard-container {
-            padding: 40px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .dashboard-header {
-            font-size: 28px;
-            color: #BE6DB7;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .btn-custom {
-            background-color: #BE6DB7;
-            color: white;
-            border: none;
-        }
-        .btn-custom:hover {
-            background-color: #C04A82;
-        }
-        .table-custom {
-            border: 2px solid #BE6DB7;
-            border-radius: 5px;
-        }
-        .table-custom th, .table-custom td {
-            border-color: #BE6DB7;
-        }
-        .table-custom thead {
-            background-color: #BE6DB7;
-            color: white;
-        }
-        .form-control:focus {
-            border-color: #DC8449;
-            box-shadow: none;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #888;
-        }
-    </style>
 </head>
 <body>
 
 <div class="container mt-5">
     <div class="dashboard-container">
         <h2 class="dashboard-header">Welcome to Your Dashboard, <?= htmlspecialchars($client_name); ?>!</h2>
-        <a href="logout.php" class="btn btn-custom float-right">Logout</a>
+        <a href="logout.php" class="btn btn-primary mb-3">Logout</a>
 
         <h4 class="text-center mb-4">Active Orders</h4>
 
@@ -164,7 +115,7 @@ $num_pages_delivered_orders = ceil($total_delivered_orders / $orders_per_page);
             <!-- Pagination for Active Orders -->
             <?php if ($num_pages_active_orders > 1): ?>
                 <nav aria-label="Active Orders Pagination">
-                    <ul class="pagination">
+                    <ul class="pagination pagination-horizontal">
                         <?php if ($page > 1): ?>
                             <li class="page-item">
                                 <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $page - 1; ?>">Previous</a>
@@ -222,7 +173,7 @@ $num_pages_delivered_orders = ceil($total_delivered_orders / $orders_per_page);
             <!-- Pagination for Order History -->
             <?php if ($num_pages_delivered_orders > 1): ?>
                 <nav aria-label="Order History Pagination">
-                    <ul class="pagination">
+                    <ul class="pagination pagination-horizontal">
                         <?php if ($page > 1): ?>
                             <li class="page-item">
                                 <a class="page-link" href="<?php echo $_SERVER['PHP_SELF']; ?>?page=<?php echo $page - 1; ?>">Previous</a>
