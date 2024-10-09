@@ -2,7 +2,7 @@
 session_start();
 require 'config.php';  // Include database connection
 
-// Generate a unique token for each user session
+// Generate a unique CSRF token for each user session
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -14,10 +14,7 @@ function validate_csrf_token($token) {
 
 // Function to sanitize inputs
 function sanitize_input($input) {
-    $input = trim($input);
-    $input = htmlspecialchars($input);
-    $input = filter_var($input, FILTER_SANITIZE_STRING);
-    return $input;
+    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
 }
 
 // Variables for pagination
@@ -29,13 +26,16 @@ $page_history = $_GET['page_history'] ?? 1;
 $start_history = ($page_history - 1) * $perPage;
 
 // Variables for search and filter
-$search = $_GET['search'] ?? '';
-$filter_status = $_GET['filter_status'] ?? '';
-$client_name = $_GET['client_name'] ?? '';
-$order_id = $_GET['order_id'] ?? '';
+$search = sanitize_input($_GET['search'] ?? '');
+$filter_status = sanitize_input($_GET['filter_status'] ?? '');
+$client_name = sanitize_input($_GET['client_name'] ?? '');
+$order_id = sanitize_input($_GET['order_id'] ?? '');
 
 // Base query for active orders
-$query_active = "SELECT o.* FROM orders o INNER JOIN users u ON o.client_id = u.id WHERE o.status != 'delivered'";
+$query_active = "SELECT o.*, u.name as client_name FROM orders o 
+                 INNER JOIN users u ON o.client_id = u.id 
+                 WHERE o.status != 'delivered'";
+
 $params_active = [];
 
 // Modify query based on client name search
@@ -57,43 +57,22 @@ if (!empty($filter_status)) {
 }
 
 // Count total active orders for pagination
-$query_count = "SELECT COUNT(*) FROM orders o INNER JOIN users u ON o.client_id = u.id WHERE o.status != 'delivered'";
-$params_count = [];
-
-if (!empty($client_name)) {
-    $query_count .= " AND u.name = :client_name";
-    $params_count[':client_name'] = $client_name;
-}
-
-if (!empty($order_id)) {
-    $query_count .= " AND o.id = :order_id";
-    $params_count[':order_id'] = $order_id;
-}
-
-if (!empty($filter_status)) {
-    $query_count .= " AND o.status = :status";
-    $params_count[':status'] = $filter_status;
-}
-
+$query_count = $query_active;
 $stmt_count = $pdo->prepare($query_count);
-$stmt_count->execute($params_count);
-$total_active_orders = $stmt_count->fetchColumn();
+$stmt_count->execute($params_active);
+$total_active_orders = $stmt_count->rowCount();
 
 // Apply pagination limit to the active orders query
 $query_active .= " LIMIT :start, :perPage";
 $stmt_active_paginated = $pdo->prepare($query_active);
 
-// Bind parameters for pagination separately
-$stmt_active_paginated->bindParam(':start', $start_active);
-$stmt_active_paginated->bindParam(':perPage', $perPage);
+// Bind parameters for pagination
+$stmt_active_paginated->bindValue(':start', $start_active, PDO::PARAM_INT);
+$stmt_active_paginated->bindValue(':perPage', $perPage, PDO::PARAM_INT);
 
 // Bind dynamic parameters
-if (!empty($params_active)) {
-    foreach ($params_active as $key => $value) {
-        if (strpos($query_active, $key) !== false) {
-            $stmt_active_paginated->bindParam($key, $value);
-        }
-    }
+foreach ($params_active as $key => $value) {
+    $stmt_active_paginated->bindValue($key, $value);
 }
 
 $stmt_active_paginated->execute();
@@ -102,8 +81,8 @@ $active_orders = $stmt_active_paginated->fetchAll(PDO::FETCH_ASSOC);
 // Fetch order history (delivered orders)
 $query_history = "SELECT * FROM orders WHERE status = 'delivered' LIMIT :start, :perPage";
 $stmt_history = $pdo->prepare($query_history);
-$stmt_history->bindParam(':start', $start_history);
-$stmt_history->bindParam(':perPage', $perPage);
+$stmt_history->bindValue(':start', $start_history, PDO::PARAM_INT);
+$stmt_history->bindValue(':perPage', $perPage, PDO::PARAM_INT);
 $stmt_history->execute();
 $order_history = $stmt_history->fetchAll(PDO::FETCH_ASSOC);
 
@@ -114,36 +93,37 @@ $users = $pdo->query("SELECT id, name FROM users WHERE role = 'client'")->fetchA
 $drivers = $pdo->query("SELECT id, driver_name FROM drivers")->fetchAll(PDO::FETCH_KEY_PAIR);
 
 // Calculate total delivered orders
-$stmt_delivered_count = $pdo->prepare("SELECT COUNT(*) FROM orders WHERE status = 'delivered'");
-$stmt_delivered_count->execute();
+$stmt_delivered_count = $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'delivered'");
 $total_delivered_orders = $stmt_delivered_count->fetchColumn();
 
 // Handle order status and driver assignment update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $csrf_token = $_POST['csrf_token'];
-    $order_id = $_POST['order_id'];
-    $new_status = $_POST['status'];
-    $driver_id = $_POST['driver_id'];
+    $order_id = sanitize_input($_POST['order_id']);
+    $new_status = sanitize_input($_POST['status']);
+    $driver_id = sanitize_input($_POST['driver_id']);
 
     // Validate CSRF token
     if (!validate_csrf_token($csrf_token)) {
         die('Invalid CSRF token');
     }
 
-    // Sanitize inputs
-    $order_id = sanitize_input($order_id);
-    $new_status = sanitize_input($new_status);
-    $driver_id = sanitize_input($driver_id);
+    // Fetch the current status of the order to prevent changes if picked up
+    $stmt = $pdo->prepare("SELECT status FROM orders WHERE id = :order_id");
+    $stmt->execute([':order_id' => $order_id]);
+    $current_status = $stmt->fetchColumn();
 
-    // Validate status
-    if (in_array($new_status, ['pending', 'picked_up', 'delivered'])) {
-        // Update the order status and driver ID based on the order ID
-        $stmt_update = $pdo->prepare("UPDATE orders SET status = :status, driver_id = :driver_id, updated_at = NOW() WHERE id = :order_id");
-        $stmt_update->bindParam(':status', $new_status);
-        $stmt_update->bindParam(':driver_id', $driver_id);
-        $stmt_update->bindParam(':order_id', $order_id);
-        $stmt_update->execute();
+    // Restrict reassigning driver if the status is already 'picked_up'
+    if ($current_status === 'picked_up') {
+        die('Driver cannot be reassigned once the order is picked up.');
     }
+
+    // Update the order status and driver ID based on the order ID
+    $stmt_update = $pdo->prepare("UPDATE orders SET status = :status, driver_id = :driver_id, updated_at = NOW() WHERE id = :order_id");
+    $stmt_update->bindParam(':status', $new_status);
+    $stmt_update->bindParam(':driver_id', $driver_id);
+    $stmt_update->bindParam(':order_id', $order_id);
+    $stmt_update->execute();
 
     header("Location: admin_dashboard.php");
     exit;
@@ -158,7 +138,7 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale= 1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Admin Dashboard</title>
 </head>
@@ -171,6 +151,7 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
         <h5>Total Active Orders: <?= $total_active_orders; ?></h5>
         <h5>Total Delivered Orders: <?= $total_delivered_orders; ?></h5>
     </section>
+
     <!-- Search and Filter Form -->
     <form method="GET" action="admin_dashboard.php" class="form-inline mb-3">
         <input type="text" name="client_name" class="form-control mr-2" placeholder="Search by Client Name" value="<?= htmlspecialchars($client_name); ?>">
@@ -183,6 +164,7 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
         </select>
         <button type="submit" class="btn btn-primary">Search</button>
     </form>
+
     <!-- Active Orders Table -->
     <h4>Active Orders</h4>
     <table class="table table-bordered">
@@ -200,7 +182,7 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
         <tbody>
             <?php foreach ($active_orders as $order): ?>
                 <tr>
-                <td><?= $order['id']; ?></td>
+                    <td><?= $order['id']; ?></td>
                     <td><?= $users[$order['client_id']] ?? 'Unknown'; ?></td>
                     <td><?= $order['address']; ?></td>
                     <td><?= $order['contact_info']; ?></td>
@@ -215,43 +197,33 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
                                 <option value="picked_up" <?= $order['status'] === 'picked_up' ? 'selected' : ''; ?>>Picked Up</option>
                                 <option value="delivered" <?= $order['status'] === 'delivered' ? 'selected' : ''; ?>>Delivered</option>
                             </select>
-                            <select name="driver_id" class="form-control mt-2" required>
+                            <select name="driver_id" class="form-control mt-2" <?= $order['status'] === 'picked_up' ? 'disabled' : ''; ?> required>
                                 <option value="">Select Driver</option>
                                 <?php foreach ($drivers as $id => $name): ?>
                                     <option value="<?= $id; ?>" <?= $order['driver_id'] == $id ? 'selected' : ''; ?>><?= $name; ?></option>
                                 <?php endforeach; ?>
                             </select>
-                            <button type="submit" class="btn btn-primary mt-2">Update</button>
+                            <button type="submit" class="btn btn-success mt-2">Update</button>
                         </form>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
+
     <!-- Pagination for Active Orders -->
     <nav>
         <ul class="pagination pagination-horizontal">
-            <?php if ($page_active > 1): ?>
-                <li class="page-item">
-                    <a class="page-link" href="?page_active=<?= $page_active - 1; ?>&client_name=<?= $client_name; ?>&filter_status=<?= $filter_status; ?>&order_id=<?= $order_id; ?>">Previous</a>
-                </li>
-            <?php endif; ?>
-            
             <?php for ($i = 1; $i <= $totalPagesActive; $i++): ?>
                 <li class="page-item <?= $i == $page_active ? 'active' : ''; ?>">
-                    <a class="page-link" href="?page_active=<?= $i; ?>&client_name=<?= $client_name; ?>&filter_status=<?= $filter_status; ?>&order_id=<?= $order_id; ?>"><?= $i; ?></a>
+                    <a class="page-link" href="admin_dashboard.php?page_active=<?= $i; ?>&client_name=<?= htmlspecialchars($client_name); ?>&order_id=<?= htmlspecialchars($order_id); ?>&filter_status=<?= htmlspecialchars($filter_status); ?>"><?= $i; ?></a>
                 </li>
             <?php endfor; ?>
-            
-            <?php if ($page_active < $totalPagesActive): ?>
-                <li class="page-item">
-                    <a class="page-link" href="?page_active=<?= $page_active + 1; ?>&client_name=<?= $client_name; ?>&filter_status=<?= $filter_status; ?>&order_id=<?= $order_id; ?>">Next</a>
-                </li>
-            <?php endif; ?>
         </ul>
     </nav>
-    <!-- Order History Table -->
-    <h4 class="mt-5">Order History (Delivered Orders)</h4>
+
+    <!-- Delivered Orders Table -->
+    <h4>Order History (Delivered Orders)</h4>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -259,9 +231,8 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
                 <th>Client Name</th>
                 <th>Address</th>
                 <th>Contact Info</th>
-                <th>Delivery Status</th>
+                <th>Status</th>
                 <th>Driver</th>
-                <th>Updated At</th>
             </tr>
         </thead>
         <tbody>
@@ -273,33 +244,21 @@ $totalPagesHistory = ceil($pdo->query("SELECT COUNT(*) FROM orders WHERE status 
                     <td><?= $order['contact_info']; ?></td>
                     <td><?= ucfirst($order['status']); ?></td>
                     <td><?= isset($drivers[$order['driver_id']]) ? $drivers[$order['driver_id']] : 'Not Assigned'; ?></td>
-                    <td><?= $order['updated_at']; ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
-    <!-- Pagination for Order History -->
+
+    <!-- Pagination for Delivered Orders -->
     <nav>
         <ul class="pagination pagination-horizontal">
-            <?php if ($page_history > 1): ?>
-                <li class="page-item">
-                        <a class="page-link" href="?page_history=<?= $page_history - 1; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>">Previous</a>
-                    </li>
-                <?php endif; ?>
-                
-                <?php for ($i = 1; $i <= $totalPagesHistory; $i++): ?>
-                    <li class="page-item <?= $i == $page_history ? 'active' : ''; ?>">
-                        <a class="page-link" href="?page_history=<?= $i; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>"><?= $i; ?></a>
-                    </li>
-                <?php endfor; ?>
-                
-                <?php if ($page_history < $totalPagesHistory): ?>
-                    <li class="page-item">
-                        <a class="page-link" href="?page_history=<?= $page_history + 1; ?>&client_name=<?= $client_name; ?>&order_id=<?= $order_id; ?>">Next</a>
-                    </li>
-                <?php endif; ?>
-            </ul>
-        </nav>
-    </div>
+            <?php for ($i = 1; $i <= $totalPagesHistory; $i++): ?>
+                <li class="page-item <?= $i == $page_history ? 'active' : ''; ?>">
+                    <a class="page-link" href="admin_dashboard.php?page_history=<?= $i; ?>"><?= $i; ?></a>
+                </li>
+            <?php endfor; ?>
+        </ul>
+    </nav>
+</div>
 </body>
 </html>
